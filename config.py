@@ -4,8 +4,8 @@ import re
 
 list_jails = ["ssh","wordpress", "php", "joomla"]
 
-log_paths = { "ssh" : "" , "wordpress" : "", "php" : "", "joomla" : ""}
-regexs = { "ssh" : "", "wordpress" : "", "php" : "", "joomla" : ""}
+log_paths = { "ssh" : '/var/log/auth.log' , "wordpress" : "", "php" : "", "joomla" : ""}
+regexs = { "ssh" : 'Failed password', "wordpress" : "", "php" : "", "joomla" : ""}
 
 def main():
 	args = sys.argv
