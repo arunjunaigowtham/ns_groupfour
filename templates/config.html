@@ -1,0 +1,77 @@
+<!DOCTYPE html> <html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico">
+    <title>Fail2ban Dashboard</title>
+    <!-- Bootstrap core CSS -->
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css')}}" rel="stylesheet">
+    <!-- Custom styles for this template -->
+    <link href="{{ url_for('static', filename='css/starter-template.css')}}" rel="stylesheet">
+  </head>
+  <body>
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">Fail2ban Dashboard</a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="/home">Home</a></li>
+            <li class="active"><a href="/config">Config</a></li>
+
+
+			<li><a href="/banned">Banned IP</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+    <div class="container">
+	<div class="row">
+	<div class="col-md-5">
+      <div class="starter-template">
+        {% for s in services %}
+			{% if cp.get(s,'enabled') == 'true' %}
+		<div class="panel panel-success">
+			<div class="panel-heading"><h>{{s}}</h></div>
+				<div class="panel-body">
+					<a class="btn btn-danger btn-large" href="disable/{{ s }}">Disable</a>
+                    <!--input number field-->
+                    <form action={{ url_for( 'read_request', s=s ) }} method="post">
+                        <label for="maxretry">Max Retry:</label>
+                        <input type="text" name="maxretry"/><br>
+                        <label for="bantime">Ban Time(In Seconds):</label>
+                        <input type="text" name="bantime"/><br>
+                        <label for="Failure Window">Failure Window(In Seconds):</label>
+                        <input type="text" name="failurewindow"/><br>
+                        <button type="submit">Submit</button>
+
+                    </form>
+				</div>
+		</div>		
+			{% endif %}
+            <!--Add three input fields in config page   -->
+			{% if cp.get(s,'enabled') == 'false' %}
+			<div class="panel panel-danger">
+				<div class="panel-heading"><h>{{s}}</h></div>
+				<div class="panel-body">
+					<a class="btn btn-success btn-large" href="enable/{{ s }}">Enable</a>
+				</div>
+			</div>	
+			{% endif %}
+
+		{% endfor %}
+      </div>
+	</div>  
+	</div>  
+    </div><!-- /.container -->
+  </body> </html>
