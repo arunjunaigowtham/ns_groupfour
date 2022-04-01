@@ -16,7 +16,7 @@ log_file = 'custom_jail.conf'  # Name of the log file
 
 @app.route('/')
 def secret_view():
-    return redirect('/home', code=302)
+    return redirect('/config', code=302)
 
 
 ##############################
@@ -25,7 +25,6 @@ def secret_view():
 
 @app.route('/home', methods=['GET', 'POST'])
 def home():
-    # status = fail2banStatus()
     return render_template('index.html')
 
 
@@ -39,7 +38,7 @@ def start():
     time.sleep(1)
     f = os.popen(f'python3 {config_file} phpmyadmin false 30 3 300')        # Configure the Phpmyadmin service
     time.sleep(1)
-    s = os.popen(f'python3 {secure_admin_main_file}')      # Start the Main process
+   # s = os.popen(f'python3 {secure_admin_main_file}')      # Start the Main process
     time.sleep(1)
     return redirect("/", code=302)
 
@@ -71,6 +70,7 @@ def read_request(s):
         cp.set(s, 'bantime', bantime)
         cp.set(s, 'failurewindow', failurewindow)
         with open(log_file, 'w') as configfile:
+            time.sleep(1)
             cp.write(configfile)
         return redirect("/config", code=302)
 
@@ -105,41 +105,6 @@ def disable(s=None):
     with open(log_file, 'w') as configfile:
         cp.write(configfile)
     return redirect("/config", code=302)
-
-
-
-# ##############################
-# # Banned IP                  #
-# ##############################
-#
-# def getcountry(ip):
-# 	r = requests.get('http://ip-api.com/json/'+ip)
-# 	parsed_json=r.json()
-# 	return parsed_json
-#
-# @app.route('/banned', methods=['GET', 'POST'])
-# @basic_auth.required
-# def banned():
-#   f = os.popen("cat /var/log/fail2ban.log | grep Ban | awk '{print $7}'")
-#   banned = f.read()
-#
-#
-#   theFile = open('/var/log/fail2ban.log','r')
-#   FILE = theFile.readlines()
-#   theFile.close()
-#   printList = []
-#   for line in FILE:
-#     if ('Ban' in line):
-#       printList.append(line)
-#   return render_template('banned.html', printList = printList, getcountry=getcountry)
-# @app.route('/banned', methods=['GET', 'POST'])
-# @basic_auth.required
-# def banned():
-#     # get banned ip list from iptables
-#     f = os.popen("iptables -L -n | grep 'DROP' | awk '{print $4}'")
-#     banned = f.read()
-#     print(banned)
-#     return render_template('banned.html', banned=banned)
 
 
 ##############################
