@@ -4,8 +4,10 @@ import sys, os
 import json
 import configparser as ConfigParser
 import time
+import logging
 
 app = Flask(__name__)
+app.logger.setLevel(logging.DEBUG)
 
 secure_admin_main_file = 'secure_admin_run.py'  # Name of the main file
 config_file = 'secure_admin_config.py'  # Name of the config file
@@ -29,15 +31,15 @@ def home():
 
 @app.route('/start', methods=['GET', 'POST'])
 def start():
+    f = os.popen(f'python3 {config_file} ssh false 30 3 300')       # Configure the SSH service
+    time.sleep(1)
+    f = os.popen(f'python3 {config_file} joomla false 30 3 300')       # Configure the Joomla service
+    time.sleep(1)
+    f = os.popen(f'python3 {config_file} wordpress false 30 3 300')       # Configure the Wordpress service
+    time.sleep(1)
+    f = os.popen(f'python3 {config_file} phpmyadmin false 30 3 300')        # Configure the Phpmyadmin service
+    time.sleep(1)
     s = os.popen(f'python3 {secure_admin_main_file}')      # Start the Main process
-    time.sleep(1)
-    f = os.popen(f'python3 config.py ssh false 30 3 300')       # Configure the SSH service
-    time.sleep(1)
-    f = os.popen(f'python3 config.py joomla false 30 3 300')       # Configure the Joomla service
-    time.sleep(1)
-    f = os.popen(f'python3 config.py wordpress false 30 3 300')       # Configure the Wordpress service
-    time.sleep(1)
-    f = os.popen(f'python3 config.py phpmyadmin false 30 3 300')        # Configure the Phpmyadmin service
     time.sleep(1)
     return redirect("/", code=302)
 
@@ -47,7 +49,7 @@ def stop():
     # get pid of the process
     pid = os.popen(f'pgrep -f {secure_admin_main_file}').read()
     # kill the process
-    os.popen(f'kill {pid}')
+    os.popen(f'kill -9 {pid}')
     return redirect("/", code=302)
 
 
@@ -77,8 +79,8 @@ def read_request(s):
 def config():
     cp = ConfigParser.RawConfigParser()
     cp.read(log_file)
-    # services = cp.sections()
-    services = ['ssh', 'joomla', 'wordpress', 'phpmyadmin']
+    services = cp.sections()
+    # services = ['ssh', 'joomla', 'wordpress', 'phpmyadmin']
     print(services)
     return render_template('config.html', cp=cp, services=services)
 
@@ -130,7 +132,7 @@ def disable(s=None):
 #     if ('Ban' in line):
 #       printList.append(line)
 #   return render_template('banned.html', printList = printList, getcountry=getcountry)
-@app.route('/banned', methods=['GET', 'POST'])
+# @app.route('/banned', methods=['GET', 'POST'])
 # @basic_auth.required
 # def banned():
 #     # get banned ip list from iptables

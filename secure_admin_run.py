@@ -70,117 +70,114 @@ def ban_ip_thread(jail_name, bantime, maxretry, failurewindow, log_path, failure
                 del ip_end_time_dict[ip]
 
 if __name__ == '__main__':
-    try :
-        config_file = 'custom_jail.conf'
-        while True:
-            cp = ConfigParser.RawConfigParser()
-            cp.read(config_file)
-            jails = cp.sections()
-            for jail in jails:
-                value_changed = False
+    config_file = 'custom_jail.conf'
+    while True:
+        cp = ConfigParser.RawConfigParser()
+        cp.read(config_file)
+        jails = cp.sections()
+        for jail in jails:
+            value_changed = False
 
-                # Track if the value is changed in the config file
-                if cp.get(jail, 'bantime') != cp.get(jail, 'bantime_old'):
-                    cp.set(jail, 'bantime_old', int(cp.get(jail, 'bantime')))
-                    value_changed = True
-                bantime = int(cp.get(jail, 'bantime'))
+            # Track if the value is changed in the config file
+            if cp.get(jail, 'bantime') != cp.get(jail, 'bantime_old'):
+                cp.set(jail, 'bantime_old', int(cp.get(jail, 'bantime')))
+                value_changed = True
+            bantime = int(cp.get(jail, 'bantime'))
 
-                if cp.get(jail, 'maxretry') != cp.get(jail, 'maxretry_old'):
-                    cp.set(jail, 'maxretry_old', int(cp.get(jail, 'maxretry')))
-                    value_changed = True
-                maxretry = int(cp.get(jail, 'maxretry'))
+            if cp.get(jail, 'maxretry') != cp.get(jail, 'maxretry_old'):
+                cp.set(jail, 'maxretry_old', int(cp.get(jail, 'maxretry')))
+                value_changed = True
+            maxretry = int(cp.get(jail, 'maxretry'))
 
-                if cp.get(jail, 'failurewindow') != cp.get(jail, 'failurewindow_old'):
-                    cp.set(jail, 'failurewindow_old', int(cp.get(jail, 'failurewindow')))
-                    value_changed = True
-                failurewindow = int(cp.get(jail, 'failurewindow'))
+            if cp.get(jail, 'failurewindow') != cp.get(jail, 'failurewindow_old'):
+                cp.set(jail, 'failurewindow_old', int(cp.get(jail, 'failurewindow')))
+                value_changed = True
+            failurewindow = int(cp.get(jail, 'failurewindow'))
 
-                failure_regex = cp.get(jail, 'regex')
+            failure_regex = cp.get(jail, 'regex')
 
-                logpath = cp.get(jail, 'logpath')
+            logpath = cp.get(jail, 'logpath')
 
-                enabled = cp.getboolean(jail, 'enabled')
+            enabled = cp.getboolean(jail, 'enabled')
 
-                # Start/Stop the thread for each jail
-                if jail == 'ssh':
-                    if enabled:
-                        print('[+] SSH jail enabled')
-                        if 'ssh_jail' in locals() and ssh_jail.is_alive():
-                                print('[+] SSH jail already running')
-                                if value_changed:
-                                    #Stop the thread and start a new one
-                                    print('[+] Restarting SSH jail thread')
-                                    ssh_jail.terminate()
-                                    ssh_jail = multiprocessing.Process(target=ban_ip_thread, args=('ssh', bantime, maxretry, failurewindow, logpath, failure_regex))
-                                    ssh_jail.start()
-                        else:
-                            ssh_jail = multiprocessing.Process(target=ban_ip_thread, args=('ssh', bantime, maxretry, failurewindow, logpath, failure_regex))
-                            ssh_jail.start()
-                    else:
-                        print('[-] SSH jail disabled')
-                        # Kill the ssh thread if its running
-                        if 'ssh_jail' in locals() and ssh_jail.is_alive():
+            # Start/Stop the thread for each jail
+            if jail == 'ssh':
+                if enabled:
+                    print('[+] SSH jail enabled')
+                    if 'ssh_jail' in locals() and ssh_jail.is_alive():
+                            print('[+] SSH jail already running')
+                            if value_changed:
+                                #Stop the thread and start a new one
+                                print('[+] Restarting SSH jail thread')
                                 ssh_jail.terminate()
-                if jail == 'wordpress':
-                    if enabled:
-                        print('[+] Wordpress jail enabled')
-                        if 'wordpress_jail' in locals() and wordpress_jail.is_alive():
-                                print('[+] Wordpress jail already running')
-                                if value_changed:
-                                    #Stop the thread and start a new one
-                                    print('[+] Restarting Wordpress jail thread')
-                                    wordpress_jail.terminate()
-                                    wordpress_jail = multiprocessing.Process(target=ban_ip_thread, args=('wordpress', bantime, maxretry, failurewindow, logpath, failure_regex))
-                                    wordpress_jail.start()
-                        else:
-                            wordpress_jail = multiprocessing.Process(target=ban_ip_thread, args=('wordpress', bantime, maxretry, failurewindow, logpath, failure_regex))
-                            wordpress_jail.start()
+                                ssh_jail = multiprocessing.Process(target=ban_ip_thread, args=('ssh', bantime, maxretry, failurewindow, logpath, failure_regex))
+                                ssh_jail.start()
                     else:
-                        print('[-] Wordpress jail disabled')
-                        # Kill the wordpress thread if its running
-                        if 'wordpress_jail' in locals() and wordpress_jail.is_alive():
+                        ssh_jail = multiprocessing.Process(target=ban_ip_thread, args=('ssh', bantime, maxretry, failurewindow, logpath, failure_regex))
+                        ssh_jail.start()
+                else:
+                    print('[-] SSH jail disabled')
+                    # Kill the ssh thread if its running
+                    if 'ssh_jail' in locals() and ssh_jail.is_alive():
+                            ssh_jail.terminate()
+            if jail == 'wordpress':
+                if enabled:
+                    print('[+] Wordpress jail enabled')
+                    if 'wordpress_jail' in locals() and wordpress_jail.is_alive():
+                            print('[+] Wordpress jail already running')
+                            if value_changed:
+                                #Stop the thread and start a new one
+                                print('[+] Restarting Wordpress jail thread')
                                 wordpress_jail.terminate()
-                if jail == 'phpmyadmin':
-                    if enabled:
-                        print('[+] Phpmyadmin jail enabled')
-                        if 'phpmyadmin_jail' in locals() and phpmyadmin_jail.is_alive():
-                                print('[+] Phpmyadmin jail already running')
-                                if value_changed:
-                                    #Stop the thread and start a new one
-                                    print('[+] Restarting Phpmyadmin jail thread')
-                                    phpmyadmin_jail.terminate()
-                                    phpmyadmin_jail = multiprocessing.Process(target=ban_ip_thread, args=('phpmyadmin', bantime, maxretry, failurewindow, logpath, failure_regex))
-                                    phpmyadmin_jail.start()
-                        else:
-                            phpmyadmin_jail = multiprocessing.Process(target=ban_ip_thread, args=('phpmyadmin', bantime, maxretry, failurewindow, logpath, failure_regex))
-                            phpmyadmin_jail.start()
+                                wordpress_jail = multiprocessing.Process(target=ban_ip_thread, args=('wordpress', bantime, maxretry, failurewindow, logpath, failure_regex))
+                                wordpress_jail.start()
                     else:
-                        print('[-] Phpmyadmin jail disabled')
-                        # Kill the phpmyadmin thread if its running
-                        if 'phpmyadmin_jail' in locals() and phpmyadmin_jail.is_alive():
+                        wordpress_jail = multiprocessing.Process(target=ban_ip_thread, args=('wordpress', bantime, maxretry, failurewindow, logpath, failure_regex))
+                        wordpress_jail.start()
+                else:
+                    print('[-] Wordpress jail disabled')
+                    # Kill the wordpress thread if its running
+                    if 'wordpress_jail' in locals() and wordpress_jail.is_alive():
+                            wordpress_jail.terminate()
+            if jail == 'phpmyadmin':
+                if enabled:
+                    print('[+] Phpmyadmin jail enabled')
+                    if 'phpmyadmin_jail' in locals() and phpmyadmin_jail.is_alive():
+                            print('[+] Phpmyadmin jail already running')
+                            if value_changed:
+                                #Stop the thread and start a new one
+                                print('[+] Restarting Phpmyadmin jail thread')
                                 phpmyadmin_jail.terminate()
-                if jail == 'joomla':
-                    if enabled:
-                        print('[+] Joomla jail enabled')
-                        if 'joomla_jail' in locals() and joomla_jail.is_alive():
-                                print('[+] Joomla jail already running')
-                                if value_changed:
-                                    #Stop the thread and start a new one
-                                    print('[+] Restarting Joomla jail thread')
-                                    joomla_jail.terminate()
-                                    joomla_jail = multiprocessing.Process(target=ban_ip_thread, args=('joomla', bantime, maxretry, failurewindow, logpath, failure_regex))
-                                    joomla_jail.start()
-                        else:
-                            joomla_jail = multiprocessing.Process(target=ban_ip_thread, args=('joomla', bantime, maxretry, failurewindow, logpath, failure_regex))
-                            joomla_jail.start()
+                                phpmyadmin_jail = multiprocessing.Process(target=ban_ip_thread, args=('phpmyadmin', bantime, maxretry, failurewindow, logpath, failure_regex))
+                                phpmyadmin_jail.start()
                     else:
-                        print('[-] Joomla jail disabled')
-                        # Kill the joomla thread if its running
-                        if 'joomla_jail' in locals() and joomla_jail.is_alive():
+                        phpmyadmin_jail = multiprocessing.Process(target=ban_ip_thread, args=('phpmyadmin', bantime, maxretry, failurewindow, logpath, failure_regex))
+                        phpmyadmin_jail.start()
+                else:
+                    print('[-] Phpmyadmin jail disabled')
+                    # Kill the phpmyadmin thread if its running
+                    if 'phpmyadmin_jail' in locals() and phpmyadmin_jail.is_alive():
+                            phpmyadmin_jail.terminate()
+            if jail == 'joomla':
+                if enabled:
+                    print('[+] Joomla jail enabled')
+                    if 'joomla_jail' in locals() and joomla_jail.is_alive():
+                            print('[+] Joomla jail already running')
+                            if value_changed:
+                                #Stop the thread and start a new one
+                                print('[+] Restarting Joomla jail thread')
                                 joomla_jail.terminate()
-                if value_changed:
-                        with open(config_file, 'w') as configfile:
-                            cp.write(configfile)
-            time.sleep(2)
-    except Exception as e:
-        print(e.args)
+                                joomla_jail = multiprocessing.Process(target=ban_ip_thread, args=('joomla', bantime, maxretry, failurewindow, logpath, failure_regex))
+                                joomla_jail.start()
+                    else:
+                        joomla_jail = multiprocessing.Process(target=ban_ip_thread, args=('joomla', bantime, maxretry, failurewindow, logpath, failure_regex))
+                        joomla_jail.start()
+                else:
+                    print('[-] Joomla jail disabled')
+                    # Kill the joomla thread if its running
+                    if 'joomla_jail' in locals() and joomla_jail.is_alive():
+                            joomla_jail.terminate()
+            if value_changed:
+                    with open(config_file, 'w') as configfile:
+                        cp.write(configfile)
+        time.sleep(5)
