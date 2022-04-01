@@ -39,7 +39,6 @@ def check_args(args):
 
 def update_fields(name):
    	name_brackets = "[" + name + "]"
-	print(name_brackets)
 
 	with open(config_file, 'w+') as f:
 		lines = f.readlines()
@@ -48,17 +47,13 @@ def update_fields(name):
 	with open(config_file, 'w+') as f:
 		for line in lines:
 			if (name_brackets in line and "#" not in line):
-				print(line)
 				in_the_jail = True
-		
 			elif(in_the_jail == False):
-				
 				f.write(line)
 			elif(line[0] == "[" and line[-2] == "]"):
 				in_the_jail = False
 				f.write(line)
-			else:
-				print(line)
+
 	with open(config_file, 'a') as f:
 		f.write("\n")
 		f.write("\n")
