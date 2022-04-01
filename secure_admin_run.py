@@ -6,15 +6,13 @@ import threading
 import multiprocessing
 import re
 import configparser as ConfigParser
+import sys
 
 def remove_iptables_rule(ip_address):
     subprocess.call(['iptables','-D','INPUT','-s',ip_address,'-j','DROP'])
 
 def ban_ip_thread(jail_name, bantime, maxretry, failurewindow, log_path, failure_regex):
-    # check if the sudo permission is given
-    if os.geteuid() != 0:
-        print("[!] Please run this script as root")
-        exit(1)
+
     failure_regex = re.compile(failure_regex)
     # Dictionary of ip addresses and their failure counts
     ip_ban_dict = {}
@@ -70,6 +68,10 @@ def ban_ip_thread(jail_name, bantime, maxretry, failurewindow, log_path, failure
                 del ip_end_time_dict[ip]
 
 if __name__ == '__main__':
+    # check if the sudo permission is given
+    if os.geteuid() != 0:
+        print("[!] Please run this script as root")
+        sys.exit(1)
     config_file = 'custom_jail.conf'
     while True:
         cp = ConfigParser.RawConfigParser()
