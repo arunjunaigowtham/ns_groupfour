@@ -1,21 +1,19 @@
-import os
-from sqlite3 import enable_shared_cache
 import sys
-import re
+import os
 
-list_jails = ["ssh","wordpress", "php", "joomla"]
+list_jails = ["ssh","wordpress", "phpmyadmin", "joomla"]
 
 log_paths = { "ssh" : r'/var/log/auth.log',
 			  "wordpress" : r'/var/log/auth.log',
-			  "php" : r'/var/log/auth.log',
-			  "joomla" : r''}
+			  "phpmyadmin" : r'/var/log/auth.log',
+			  "joomla" : r'/var/www/html/joomla/administrator/logs/error.php'}
 regexs = { "ssh" : r'^(?=.*\ssshd\b)(?=.*\bFailed password\b).*$',
 		   "wordpress" : r'^(?=.*\swordpress\b)(?=.*\bAuthentication failure\b).*$',
-		   "php" : r'^(?=.*\sphpMyAdmin\b)(?=.*\buser denied\b).*$',
-		   "joomla" : r''}
+		   "phpmyadmin" : r'^(?=.*\sphpMyAdmin\b)(?=.*\buser denied\b).*$',
+		   "joomla" : r'^(?=.*\sjoomlafailure\b).*$'}
 config_file = 'custom_jail.conf'
 
-def main():
+def main_fn():
 	args = sys.argv
 	check_args(args)
 	global jailname
@@ -29,19 +27,18 @@ def main():
 	global failurewindow
 	failurewindow = args[5]
 	update_fields(jailname)
+	return
 	
 def check_args(args):
-	args= sys.argv
-	if(len(args) < 6 or not args[3].isnumeric() or not args[4].isnumeric() or not args[5].isnumeric()):
-		print("ERROR, please use the following format : [JAILNAME] [ENABLED:true/false] [BANTIME] [MAXRETRY] [FAILUREWINDOW]")
-		return
+    if (len(args) < 6 or not args[3].isnumeric() or not args[4].isnumeric() or not args[5].isnumeric()):
+    	print("ERROR, please use the following format : [JAILNAME] [ENABLED:true/false] [BANTIME] [MAXRETRY] [FAILUREWINDOW]")
+		sys.exit(1)
 	if(args[1].lower() not in list_jails):
-		print("Please enter a jail name from the following: ssh, wordpress, php, joomla")
-		return
-
+   		print("Please enter a jail name from the following: ssh, wordpress, phpmyadmin, joomla")
+		sys.exit(1)
 
 def update_fields(name):
-	name_brackets = "[" + name + "]"
+   	name_brackets = "[" + name + "]"
 	print(name_brackets)
 
 	with open(config_file, 'w+') as f:
@@ -84,4 +81,5 @@ def update_fields(name):
 		f.write("\n")
 		f.write("regex = ")
 		f.write(str(regexs[name]))
-main()				
+		f.write("\n")
+main_fn()				
